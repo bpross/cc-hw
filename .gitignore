@@ -7,9 +7,13 @@
 
 # Test binary, built with `go test -c`
 *.test
+*.coverprofile
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# vim tmp files
+*.swp
 
 # Dependency directories (remove the comment below to include it)
 # vendor/

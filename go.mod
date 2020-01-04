@@ -2,4 +2,11 @@ module github.com/bpross/cc-hw
 
 go 1.13
 
-require github.com/sirupsen/logrus v1.4.2
+require (
+	github.com/onsi/ginkgo v1.11.0
+	github.com/onsi/gomega v1.8.1
+	github.com/sirupsen/logrus v1.4.2
+	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
+	golang.org/x/tools v0.0.0-20200103221440-774c71fcf114 // indirect
+	labix.org/v2/mgo v0.0.0-20140701140051-000000000287
+)

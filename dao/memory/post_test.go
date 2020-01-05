@@ -35,7 +35,7 @@ var _ = Describe("MemoryPoster", func() {
 		customerID = "test-customer"
 		postID = bson.NewObjectId()
 		post = &dao.Post{
-			ID:     postID,
+			ID:     &postID,
 			CustID: customerID,
 			URL:    "test-url",
 			Captions: []string{

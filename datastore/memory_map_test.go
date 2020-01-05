@@ -20,7 +20,7 @@ var _ = Describe("InMemoryDatastore", func() {
 	BeforeEach(func() {
 		// TODO pass in no-op logger, so we dont log during tests
 		logger = log.New()
-		ds = NewInMemoryDatastore(*logger)
+		ds = NewInMemoryDatastore(logger)
 		customerID = "test-customer"
 	})
 
@@ -37,7 +37,7 @@ var _ = Describe("InMemoryDatastore", func() {
 		Context("without post", func() {
 			It("should return an error", func() {
 				Expect(err).NotTo(BeNil())
-				Expect(err.Error()).To(Equal("must provide post"))
+				Expect(err.Error()).To(Equal("invalid must provide post"))
 			})
 
 			It("should NOT return a post", func() {
@@ -47,14 +47,15 @@ var _ = Describe("InMemoryDatastore", func() {
 
 		Context("with post.ID", func() {
 			BeforeEach(func() {
+				id := bson.NewObjectId()
 				post = &dao.Post{
-					ID: bson.NewObjectId(),
+					ID: &id,
 				}
 			})
 
 			It("should return an error", func() {
 				Expect(err).NotTo(BeNil())
-				Expect(err.Error()).To(Equal("cannot provide ID"))
+				Expect(err.Error()).To(Equal("invalid cannot provide ID"))
 			})
 
 			It("should NOT return a post", func() {
@@ -106,7 +107,7 @@ var _ = Describe("InMemoryDatastore", func() {
 				})
 
 				It("should insert a post", func() {
-					storeID := createCompositeID(customerID, retPost.ID)
+					storeID := createCompositeID(customerID, *retPost.ID)
 					Expect(ds.store).To(HaveKeyWithValue(storeID, retPost))
 				})
 			})
@@ -185,7 +186,7 @@ var _ = Describe("InMemoryDatastore", func() {
 						ds.store = make(map[string]*dao.Post)
 						storeID := createCompositeID(customerID, postID)
 						post = &dao.Post{
-							ID:     postID,
+							ID:     &postID,
 							CustID: customerID,
 							URL:    "test-url",
 							Captions: []string{
@@ -246,7 +247,7 @@ var _ = Describe("InMemoryDatastore", func() {
 
 			Context("without post.ID", func() {
 				BeforeEach(func() {
-					post.ID = ""
+					post.ID = nil
 				})
 
 				It("should return an error", func() {
@@ -263,7 +264,7 @@ var _ = Describe("InMemoryDatastore", func() {
 				var postID bson.ObjectId
 				BeforeEach(func() {
 					postID = bson.NewObjectId()
-					post.ID = postID
+					post.ID = &postID
 				})
 
 				Context("without customerID", func() {
@@ -286,7 +287,7 @@ var _ = Describe("InMemoryDatastore", func() {
 						ds.store = make(map[string]*dao.Post)
 						storeID := createCompositeID(customerID, postID)
 						storedPost := &dao.Post{
-							ID:     postID,
+							ID:     &postID,
 							CustID: customerID,
 							URL:    "test-url",
 							Captions: []string{
@@ -307,7 +308,7 @@ var _ = Describe("InMemoryDatastore", func() {
 					})
 
 					It("should update the post", func() {
-						storeID := createCompositeID(customerID, retPost.ID)
+						storeID := createCompositeID(customerID, *retPost.ID)
 						Expect(ds.store).To(HaveKeyWithValue(storeID, retPost))
 					})
 				})

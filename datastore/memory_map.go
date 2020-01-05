@@ -34,11 +34,11 @@ func NewInMemoryDatastore(logger *log.Logger) *InMemoryDatastore {
 // Insert inserts a new post into the map, customerID is used to enforce tenancy
 func (d *InMemoryDatastore) Insert(customerID string, post *dao.Post) (*dao.Post, error) {
 	if post == nil {
-		return nil, fmt.Errorf("must provide post")
+		return nil, NewInvalidArugmentError("must provide post")
 	}
 
-	if post.ID != "" {
-		return nil, fmt.Errorf("cannot provide ID")
+	if post.ID != nil {
+		return nil, NewInvalidArugmentError("cannot provide ID")
 	}
 
 	if customerID == "" {
@@ -57,7 +57,7 @@ func (d *InMemoryDatastore) Insert(customerID string, post *dao.Post) (*dao.Post
 
 	// Create new post
 	r := &dao.Post{
-		ID:       id,
+		ID:       &id,
 		CustID:   customerID,
 		URL:      post.URL,
 		Captions: post.Captions,
@@ -112,7 +112,7 @@ func (d *InMemoryDatastore) Update(customerID string, post *dao.Post) (*dao.Post
 		return nil, fmt.Errorf("must provide post")
 	}
 
-	if post.ID == "" {
+	if post.ID == nil {
 		return nil, NewInvalidArugmentError("postID")
 	}
 
@@ -128,7 +128,7 @@ func (d *InMemoryDatastore) Update(customerID string, post *dao.Post) (*dao.Post
 	logger.Debug("updating")
 
 	// Create composite id
-	storeID := createCompositeID(customerID, post.ID)
+	storeID := createCompositeID(customerID, *post.ID)
 
 	// Find post in the datastore, if ok is false, the post DNE
 	_, ok := d.store[storeID]

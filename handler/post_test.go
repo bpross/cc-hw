@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -25,6 +27,10 @@ var _ = Describe("DefaulPoster", func() {
 		handler    *DefaultPoster
 		router     *gin.Engine
 		customerID string
+		recorder   *httptest.ResponseRecorder
+		method     string
+		url        string
+		req        *http.Request
 	)
 
 	BeforeEach(func() {
@@ -33,6 +39,7 @@ var _ = Describe("DefaulPoster", func() {
 		handler = NewDefaultPoster(mockPoster)
 		router = setupRouter(handler)
 		customerID = "test-customer"
+		recorder = httptest.NewRecorder()
 	})
 
 	AfterEach(func() {
@@ -41,18 +48,13 @@ var _ = Describe("DefaulPoster", func() {
 
 	Describe("Get", func() {
 		var (
-			recorder *httptest.ResponseRecorder
-			req      *http.Request
-			method   string
-			url      string
-			postID   bson.ObjectId
-			err      error
+			postID bson.ObjectId
+			err    error
 		)
 
 		BeforeEach(func() {
 			postID = bson.NewObjectId()
 			method = "GET"
-			recorder = httptest.NewRecorder()
 		})
 
 		JustBeforeEach(func() {
@@ -165,7 +167,7 @@ var _ = Describe("DefaulPoster", func() {
 					)
 					BeforeEach(func() {
 						dsPost = &dao.Post{
-							ID:     postID,
+							ID:     &postID,
 							CustID: customerID,
 							URL:    "test-url",
 							Captions: []string{
@@ -182,7 +184,147 @@ var _ = Describe("DefaulPoster", func() {
 					})
 
 					It("should return a post", func() {
-						expected := fmt.Sprintf(`{"ID":"%s","CustID":"test-customer","URL":"test-url","Captions":["caption1","caption2","caption3"]}`, postID.Hex())
+						expected := fmt.Sprintf(`{"id":"%s","cust_id":"test-customer","url":"test-url","captions":["caption1","caption2","caption3"]}`, postID.Hex())
+						actual := strings.TrimSuffix(recorder.Body.String(), "\n")
+						Expect(actual).To(Equal(expected))
+					})
+				})
+			})
+		})
+	})
+
+	Describe("Post", func() {
+		var err error
+		BeforeEach(func() {
+			method = "POST"
+			url = "/post"
+		})
+
+		JustBeforeEach(func() {
+			router.ServeHTTP(recorder, req)
+		})
+
+		Context("without customerID in header", func() {
+			BeforeEach(func() {
+				req, err = http.NewRequest(method, url, nil)
+				Expect(err).To(BeNil())
+			})
+
+			It("should return StatusBadRequest", func() {
+				Expect(recorder.Code).To(Equal(http.StatusBadRequest))
+			})
+
+			It("should return a useful message", func() {
+				expected := `{"message":"must include customerID in headers"}`
+				actual := strings.TrimSuffix(recorder.Body.String(), "\n")
+				Expect(actual).To(Equal(expected))
+			})
+		})
+
+		Context("with customerID in header", func() {
+			Context("with json error", func() {
+				BeforeEach(func() {
+					req, err = http.NewRequest(method, url, nil)
+					Expect(err).To(BeNil())
+					req.Header.Add(customerIdHeader, customerID)
+				})
+
+				It("should return StatusBadRequest", func() {
+					Expect(recorder.Code).To(Equal(http.StatusBadRequest))
+				})
+
+				It("should return a useful message", func() {
+					expected := `{"message":"invalid request"}`
+					actual := strings.TrimSuffix(recorder.Body.String(), "\n")
+					Expect(actual).To(Equal(expected))
+				})
+			})
+
+			Context("with valid json", func() {
+				var (
+					post dao.Post
+					body []byte
+				)
+				BeforeEach(func() {
+					post = dao.Post{
+						CustID: customerID,
+						URL:    "test-url",
+						Captions: []string{
+							"caption1",
+							"caption2",
+							"caption3",
+						},
+					}
+					body, err = json.Marshal(post)
+					Expect(err).To(BeNil())
+					req, err = http.NewRequest(method, url, bytes.NewBuffer(body))
+					Expect(err).To(BeNil())
+					req.Header.Add(customerIdHeader, customerID)
+					req.Header.Add("Content-Type", "application/json")
+				})
+
+				Context("with datastore error", func() {
+					Context("with InvalidArugment error", func() {
+						BeforeEach(func() {
+							daoErr := datastore.NewInvalidArugmentError("test-error")
+							mockPoster.EXPECT().Insert(customerID, &post).Return(nil, daoErr)
+						})
+
+						It("should return StatusBadRequest", func() {
+							Expect(recorder.Code).To(Equal(http.StatusBadRequest))
+						})
+
+						It("should return the datastore message", func() {
+							expected := `{"message":"invalid test-error"}`
+							actual := strings.TrimSuffix(recorder.Body.String(), "\n")
+							Expect(actual).To(Equal(expected))
+						})
+					})
+
+					Context("with unknown error", func() {
+						BeforeEach(func() {
+							daoErr := errors.New("test-error")
+							mockPoster.EXPECT().Insert(customerID, &post).Return(nil, daoErr)
+						})
+
+						It("should return StatusInternalServerError", func() {
+							Expect(recorder.Code).To(Equal(http.StatusInternalServerError))
+						})
+
+						It("should return the datastore message", func() {
+							expected := `{"message":"test-error"}`
+							actual := strings.TrimSuffix(recorder.Body.String(), "\n")
+							Expect(actual).To(Equal(expected))
+						})
+					})
+				})
+
+				Context("with datastore success", func() {
+					var (
+						dsPost *dao.Post
+						postID bson.ObjectId
+					)
+					BeforeEach(func() {
+						postID = bson.NewObjectId()
+						dsPost = &dao.Post{
+							ID:     &postID,
+							CustID: customerID,
+							URL:    "test-url",
+							Captions: []string{
+								"caption1",
+								"caption2",
+								"caption3",
+							},
+						}
+						mockPoster.EXPECT().Insert(customerID, &post).Return(dsPost, nil)
+					})
+
+					It("should return StatusOK", func() {
+						Expect(recorder.Code).To(Equal(http.StatusOK))
+					})
+
+					It("should return a post", func() {
+						expected := fmt.Sprintf(`{"id":"%s","cust_id":"test-customer","url":"test-url","captions":["caption1","caption2","caption3"]}`, postID.Hex())
 						actual := strings.TrimSuffix(recorder.Body.String(), "\n")
 						Expect(actual).To(Equal(expected))
 					})

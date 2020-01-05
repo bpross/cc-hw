@@ -16,5 +16,6 @@ func TestHandler(t *testing.T) {
 func setupRouter(p *DefaultPoster) *gin.Engine {
 	r := gin.Default()
 	r.GET("/post/:id", p.Get)
+	r.POST("/post", p.Post)
 	return r
 }

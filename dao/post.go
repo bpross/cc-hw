@@ -6,10 +6,10 @@ import (
 
 // Post stores in the information about a url
 type Post struct {
-	ID       bson.ObjectId
-	CustID   string
-	URL      string
-	Captions []string
+	ID       *bson.ObjectId `json:"id, omitempty"`
+	CustID   string         `json:"cust_id"`
+	URL      string         `json:"url"`
+	Captions []string       `json:"captions", omitempty`
 }
 
 // Poster defines the interface for persisting posts

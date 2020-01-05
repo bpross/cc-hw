@@ -3,7 +3,6 @@ package handler
 import (
 	"net/http"
 
-	ginlogrus "github.com/Bose/go-gin-logrus"
 	"github.com/gin-gonic/gin"
 	"labix.org/v2/mgo/bson"
 
@@ -16,6 +15,7 @@ const customerIdHeader = "x-customer-id"
 // Poster defines the interface to handle post requests
 type Poster interface {
 	Get(*gin.Context)
+	Post(*gin.Context)
 }
 
 // DefaultPoster implements the Poster interface
@@ -31,11 +31,9 @@ func NewDefaultPoster(ds dao.Poster) *DefaultPoster {
 }
 
 func (p *DefaultPoster) Get(c *gin.Context) {
-	logger := ginlogrus.GetCtxLogger(c)
 	urlID := c.Param("id")
 	// Check if id is valid
 	ok := bson.IsObjectIdHex(urlID)
-	logger.Debug(ok)
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid post id"})
 		return
@@ -59,6 +57,37 @@ func (p *DefaultPoster) Get(c *gin.Context) {
 			return
 		case *datastore.NotFound:
 			c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+	}
+	c.PureJSON(http.StatusOK, post)
+	return
+}
+
+func (p *DefaultPoster) Post(c *gin.Context) {
+	// Get headers
+	customerID := c.Request.Header.Get(customerIdHeader)
+
+	if customerID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "must include customerID in headers"})
+		return
+	}
+
+	// Hydrate post
+	input := &dao.Post{}
+	if err := c.BindJSON(input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	post, err := p.ds.Insert(customerID, input)
+	if err != nil {
+		switch err.(type) {
+		case *datastore.InvalidArugment:
+			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 			return
 		default:
 			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})

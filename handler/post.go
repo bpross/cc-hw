@@ -12,6 +12,15 @@ import (
 
 const customerIDHeader = "x-customer-id"
 
+type PostRequest struct {
+	URL      string   `json:"url"`
+	Captions []string `json:"captions", omitempty`
+}
+
+type PutRequest struct {
+	Captions []string `json:"captions", omitempty`
+}
+
 // Poster defines the interface to handle post requests
 type Poster interface {
 	Get(*gin.Context)
@@ -65,12 +74,13 @@ func (p *DefaultPoster) Post(c *gin.Context) {
 		return
 	}
 	// Hydrate post
-	input := &dao.Post{}
-	if err := c.BindJSON(input); err != nil {
+	req := &PostRequest{}
+	if err := c.BindJSON(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
+	input := postRequestToPost(*req)
 	post, err := p.ds.Insert(customerID, input)
 	if err != nil {
 		setReturnError(err, c)
@@ -98,15 +108,13 @@ func (p *DefaultPoster) Put(c *gin.Context) {
 	}
 
 	// Hydrate post
-	input := &dao.Post{}
-	if err := c.BindJSON(input); err != nil {
+	req := &PutRequest{}
+	if err := c.BindJSON(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
-	// this is weird
-	input.ID = &id
-
+	input := putRequestToPost(*req, id)
 	post, err := p.ds.Update(customerID, input)
 	if err != nil {
 		setReturnError(err, c)
@@ -146,5 +154,19 @@ func setReturnError(dsErr error, c *gin.Context) {
 	default:
 		c.JSON(http.StatusInternalServerError, gin.H{"message": dsErr.Error()})
 		return
+	}
+}
+
+func postRequestToPost(req PostRequest) *dao.Post {
+	return &dao.Post{
+		URL:      req.URL,
+		Captions: req.Captions,
+	}
+}
+
+func putRequestToPost(req PutRequest, id bson.ObjectId) *dao.Post {
+	return &dao.Post{
+		ID:       &id,
+		Captions: req.Captions,
 	}
 }

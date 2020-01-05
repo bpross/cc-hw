@@ -247,8 +247,7 @@ var _ = Describe("DefaulPoster", func() {
 				)
 				BeforeEach(func() {
 					post = dao.Post{
-						CustID: customerID,
-						URL:    "test-url",
+						URL: "test-url",
 						Captions: []string{
 							"caption1",
 							"caption2",
@@ -413,9 +412,7 @@ var _ = Describe("DefaulPoster", func() {
 					)
 					BeforeEach(func() {
 						post = dao.Post{
-							ID:     &postID,
-							CustID: customerID,
-							URL:    "test-url",
+							ID: &postID,
 							Captions: []string{
 								"caption1",
 								"caption2",

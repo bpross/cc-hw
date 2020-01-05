@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"io/ioutil"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,7 @@ func TestHandler(t *testing.T) {
 }
 
 func setupRouter(p *DefaultPoster) *gin.Engine {
+	gin.DefaultWriter = ioutil.Discard
 	r := gin.Default()
 	r.GET("/post/:id", p.Get)
 	r.POST("/post", p.Post)

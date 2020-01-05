@@ -131,16 +131,19 @@ func (d *InMemoryDatastore) Update(customerID string, post *dao.Post) (*dao.Post
 	storeID := createCompositeID(customerID, *post.ID)
 
 	// Find post in the datastore, if ok is false, the post DNE
-	_, ok := d.store[storeID]
+	prev, ok := d.store[storeID]
 	if !ok {
 		return nil, NewNotFoundError("post")
 	}
 
+	// Only copy over captions
+	prev.Captions = post.Captions
+
 	// Store post
-	d.store[storeID] = post
+	d.store[storeID] = prev
 
 	logger.Info("successfully updated post")
-	return post, nil
+	return prev, nil
 }
 
 func createCompositeID(customerID string, postID bson.ObjectId) string {

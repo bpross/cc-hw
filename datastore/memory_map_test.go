@@ -1,6 +1,8 @@
 package datastore
 
 import (
+	"io/ioutil"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	log "github.com/sirupsen/logrus"
@@ -18,8 +20,8 @@ var _ = Describe("InMemoryDatastore", func() {
 	)
 
 	BeforeEach(func() {
-		// TODO pass in no-op logger, so we dont log during tests
 		logger = log.New()
+		logger.Out = ioutil.Discard
 		ds = NewInMemoryDatastore(logger)
 		customerID = "test-customer"
 	})
@@ -236,7 +238,7 @@ var _ = Describe("InMemoryDatastore", func() {
 			BeforeEach(func() {
 				post = &dao.Post{
 					CustID: customerID,
-					URL:    "test-url1",
+					URL:    "test-url",
 					Captions: []string{
 						"caption4",
 						"caption5",
@@ -307,7 +309,7 @@ var _ = Describe("InMemoryDatastore", func() {
 						Expect(retPost).To(Equal(post))
 					})
 
-					It("should update the post", func() {
+					It("should update the post captions", func() {
 						storeID := createCompositeID(customerID, *retPost.ID)
 						Expect(ds.store).To(HaveKeyWithValue(storeID, retPost))
 					})

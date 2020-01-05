@@ -2,6 +2,7 @@ package memory
 
 import (
 	"errors"
+	"io/ioutil"
 
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
@@ -26,9 +27,9 @@ var _ = Describe("MemoryPoster", func() {
 	)
 
 	BeforeEach(func() {
-		// TODO pass in no-op logger, so we dont log during tests
 		mockCtrl = gomock.NewController(GinkgoT())
 		logger = log.New()
+		logger.Out = ioutil.Discard
 		mockDs = mock_datastore.NewMockDatastore(mockCtrl)
 		p = NewPoster(logger, mockDs)
 

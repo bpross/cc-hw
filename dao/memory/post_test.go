@@ -16,8 +16,8 @@ import (
 var _ = Describe("MemoryPoster", func() {
 	var (
 		logger   *log.Logger
-		p        *MemoryPoster
-		mock_ds  *mock_datastore.MockDatastore
+		p        *Poster
+		mockDs   *mock_datastore.MockDatastore
 		mockCtrl *gomock.Controller
 
 		customerID string
@@ -29,8 +29,8 @@ var _ = Describe("MemoryPoster", func() {
 		// TODO pass in no-op logger, so we dont log during tests
 		mockCtrl = gomock.NewController(GinkgoT())
 		logger = log.New()
-		mock_ds = mock_datastore.NewMockDatastore(mockCtrl)
-		p = NewMemoryPoster(logger, mock_ds)
+		mockDs = mock_datastore.NewMockDatastore(mockCtrl)
+		p = NewPoster(logger, mockDs)
 
 		customerID = "test-customer"
 		postID = bson.NewObjectId()
@@ -66,7 +66,7 @@ var _ = Describe("MemoryPoster", func() {
 			)
 			BeforeEach(func() {
 				dsErr = errors.New("test-error")
-				mock_ds.EXPECT().Insert(customerID, post).Return(nil, dsErr)
+				mockDs.EXPECT().Insert(customerID, post).Return(nil, dsErr)
 			})
 
 			It("should return an error", func() {
@@ -81,7 +81,7 @@ var _ = Describe("MemoryPoster", func() {
 
 		Context("without datastore error", func() {
 			BeforeEach(func() {
-				mock_ds.EXPECT().Insert(customerID, post).Return(post, nil)
+				mockDs.EXPECT().Insert(customerID, post).Return(post, nil)
 			})
 
 			It("should NOT return an error", func() {
@@ -110,7 +110,7 @@ var _ = Describe("MemoryPoster", func() {
 			)
 			BeforeEach(func() {
 				dsErr = errors.New("test-error")
-				mock_ds.EXPECT().Get(customerID, postID).Return(nil, dsErr)
+				mockDs.EXPECT().Get(customerID, postID).Return(nil, dsErr)
 			})
 
 			It("should return an error", func() {
@@ -125,7 +125,7 @@ var _ = Describe("MemoryPoster", func() {
 
 		Context("without datastore error", func() {
 			BeforeEach(func() {
-				mock_ds.EXPECT().Get(customerID, postID).Return(post, nil)
+				mockDs.EXPECT().Get(customerID, postID).Return(post, nil)
 			})
 
 			It("should NOT return an error", func() {
@@ -154,7 +154,7 @@ var _ = Describe("MemoryPoster", func() {
 			)
 			BeforeEach(func() {
 				dsErr = errors.New("test-error")
-				mock_ds.EXPECT().Update(customerID, post).Return(nil, dsErr)
+				mockDs.EXPECT().Update(customerID, post).Return(nil, dsErr)
 			})
 
 			It("should return an error", func() {
@@ -169,7 +169,7 @@ var _ = Describe("MemoryPoster", func() {
 
 		Context("without datastore error", func() {
 			BeforeEach(func() {
-				mock_ds.EXPECT().Update(customerID, post).Return(post, nil)
+				mockDs.EXPECT().Update(customerID, post).Return(post, nil)
 			})
 
 			It("should NOT return an error", func() {

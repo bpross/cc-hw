@@ -10,7 +10,7 @@ import (
 	"github.com/bpross/cc-hw/datastore"
 )
 
-const customerIdHeader = "x-customer-id"
+const customerIDHeader = "x-customer-id"
 
 // Poster defines the interface to handle post requests
 type Poster interface {
@@ -31,6 +31,7 @@ func NewDefaultPoster(ds dao.Poster) *DefaultPoster {
 	}
 }
 
+// Get defines the handler for post GET requests
 func (p *DefaultPoster) Get(c *gin.Context) {
 	urlID := c.Param("id")
 	// Check if id is valid
@@ -56,6 +57,7 @@ func (p *DefaultPoster) Get(c *gin.Context) {
 	return
 }
 
+// Post defines the handler for post POST requests
 func (p *DefaultPoster) Post(c *gin.Context) {
 	// Get headers
 	customerID := getAndValidateHeaders(c)
@@ -78,6 +80,7 @@ func (p *DefaultPoster) Post(c *gin.Context) {
 	return
 }
 
+// Put defines the handler for handling post PUT requests
 func (p *DefaultPoster) Put(c *gin.Context) {
 	urlID := c.Param("id")
 	// Check if id is valid
@@ -124,7 +127,7 @@ func validateID(c *gin.Context, urlID string) bool {
 
 func getAndValidateHeaders(c *gin.Context) string {
 	// Get headers
-	customerID := c.Request.Header.Get(customerIdHeader)
+	customerID := c.Request.Header.Get(customerIDHeader)
 
 	if customerID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "must include customerID in headers"})
@@ -133,15 +136,15 @@ func getAndValidateHeaders(c *gin.Context) string {
 }
 
 func setReturnError(dsErr error, c *gin.Context) {
-	switch err.(type) {
+	switch dsErr.(type) {
 	case *datastore.InvalidArugment:
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": dsErr.Error()})
 		return
 	case *datastore.NotFound:
-		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"message": dsErr.Error()})
 		return
 	default:
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": dsErr.Error()})
 		return
 	}
 }

@@ -1,0 +1,26 @@
+version: "3"
+
+services:
+
+  builder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - backend
+    volumes:
+      - ./:/cc
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    networks:
+      - backend
+    expose:
+      - "8080"
+    ports:
+        - "8080:8080"
+
+networks:
+  backend: {}

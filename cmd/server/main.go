@@ -30,7 +30,7 @@ func main() {
 		ginlogrus.WithAggregateLogging(true)))
 
 	memDS := datastore.NewInMemoryDatastore(logger)
-	posterDS := memory.NewMemoryPoster(logger, memDS)
+	posterDS := memory.NewPoster(logger, memDS)
 	handler := handler.NewDefaultPoster(posterDS)
 	r.GET("/post/:id", handler.Get)
 	r.POST("/post", handler.Post)

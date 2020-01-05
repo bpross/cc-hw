@@ -2,16 +2,11 @@ FROM golang
 
 ENV GO111MODULE=on
 
-WORKDIR /
+WORKDIR /cc
 
 COPY go.mod .
 COPY go.sum .
-
-RUN go mod download
-
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build cmd/server/main.go
-
-EXPOSE 8080
-ENTRYPOINT ["/main"]
+RUN go get -u golang.org/x/lint/golint
+RUN go get github.com/onsi/ginkgo/ginkgo

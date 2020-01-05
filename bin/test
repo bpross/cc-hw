@@ -1,0 +1,2 @@
+#!/bin/bash
+ginkgo --race --cover --progress dao/ dao/memory/ handler/ datastore/

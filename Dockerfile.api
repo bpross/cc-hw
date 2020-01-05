@@ -1,0 +1,5 @@
+FROM scratch
+WORKDIR /cc
+COPY dist/post_server .
+EXPOSE 8080
+ENTRYPOINT ["/cc/post_server"]

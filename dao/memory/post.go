@@ -8,28 +8,31 @@ import (
 	"github.com/bpross/cc-hw/datastore"
 )
 
-// MemoryPoster implements the Poster interface using an in-memory datastore
-type MemoryPoster struct {
+// Poster implements the Poster interface using an in-memory datastore
+type Poster struct {
 	logger *log.Logger
 	ds     datastore.Datastore
 }
 
-// NewMemoryPoster creates a new MemoryPoster with the supplied options
-func NewMemoryPoster(logger *log.Logger, ds datastore.Datastore) *MemoryPoster {
-	return &MemoryPoster{
+// NewPoster creates a new Poster with the supplied options
+func NewPoster(logger *log.Logger, ds datastore.Datastore) *Poster {
+	return &Poster{
 		logger: logger,
 		ds:     ds,
 	}
 }
 
-func (d *MemoryPoster) Insert(customerID string, post *dao.Post) (*dao.Post, error) {
+// Insert handles post insert requests using the underlying in memory datastore
+func (d *Poster) Insert(customerID string, post *dao.Post) (*dao.Post, error) {
 	return d.ds.Insert(customerID, post)
 }
 
-func (d *MemoryPoster) Get(customerID string, postID bson.ObjectId) (*dao.Post, error) {
+// Get handles post get requests using the underlying in memory datastore
+func (d *Poster) Get(customerID string, postID bson.ObjectId) (*dao.Post, error) {
 	return d.ds.Get(customerID, postID)
 }
 
-func (d *MemoryPoster) Update(customerID string, postID *dao.Post) (*dao.Post, error) {
+// Update handles post update requests using the underlying in memory datastore
+func (d *Poster) Update(customerID string, postID *dao.Post) (*dao.Post, error) {
 	return d.ds.Update(customerID, postID)
 }

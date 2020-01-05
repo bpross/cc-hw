@@ -105,7 +105,7 @@ var _ = Describe("DefaulPoster", func() {
 				BeforeEach(func() {
 					req, err = http.NewRequest(method, url, nil)
 					Expect(err).To(BeNil())
-					req.Header.Add(customerIdHeader, customerID)
+					req.Header.Add(customerIDHeader, customerID)
 				})
 
 				Context("with datastore error", func() {
@@ -226,7 +226,7 @@ var _ = Describe("DefaulPoster", func() {
 				BeforeEach(func() {
 					req, err = http.NewRequest(method, url, nil)
 					Expect(err).To(BeNil())
-					req.Header.Add(customerIdHeader, customerID)
+					req.Header.Add(customerIDHeader, customerID)
 				})
 
 				It("should return StatusBadRequest", func() {
@@ -259,7 +259,7 @@ var _ = Describe("DefaulPoster", func() {
 					Expect(err).To(BeNil())
 					req, err = http.NewRequest(method, url, bytes.NewBuffer(body))
 					Expect(err).To(BeNil())
-					req.Header.Add(customerIdHeader, customerID)
+					req.Header.Add(customerIDHeader, customerID)
 					req.Header.Add("Content-Type", "application/json")
 				})
 
@@ -392,7 +392,7 @@ var _ = Describe("DefaulPoster", func() {
 					BeforeEach(func() {
 						req, err = http.NewRequest(method, url, nil)
 						Expect(err).To(BeNil())
-						req.Header.Add(customerIdHeader, customerID)
+						req.Header.Add(customerIDHeader, customerID)
 					})
 
 					It("should return StatusBadRequest", func() {
@@ -426,7 +426,7 @@ var _ = Describe("DefaulPoster", func() {
 						Expect(err).To(BeNil())
 						req, err = http.NewRequest(method, url, bytes.NewBuffer(body))
 						Expect(err).To(BeNil())
-						req.Header.Add(customerIdHeader, customerID)
+						req.Header.Add(customerIDHeader, customerID)
 						req.Header.Add("Content-Type", "application/json")
 					})
 

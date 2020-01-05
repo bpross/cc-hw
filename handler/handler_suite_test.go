@@ -17,5 +17,6 @@ func setupRouter(p *DefaultPoster) *gin.Engine {
 	r := gin.Default()
 	r.GET("/post/:id", p.Get)
 	r.POST("/post", p.Post)
+	r.PUT("/post/:id", p.Put)
 	return r
 }

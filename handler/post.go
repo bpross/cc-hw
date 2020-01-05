@@ -16,6 +16,7 @@ const customerIdHeader = "x-customer-id"
 type Poster interface {
 	Get(*gin.Context)
 	Post(*gin.Context)
+	Put(*gin.Context)
 }
 
 // DefaultPoster implements the Poster interface
@@ -33,35 +34,23 @@ func NewDefaultPoster(ds dao.Poster) *DefaultPoster {
 func (p *DefaultPoster) Get(c *gin.Context) {
 	urlID := c.Param("id")
 	// Check if id is valid
-	ok := bson.IsObjectIdHex(urlID)
+	ok := validateID(c, urlID)
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid post id"})
 		return
 	}
 
 	id := bson.ObjectIdHex(urlID)
 
 	// Get headers
-	customerID := c.Request.Header.Get(customerIdHeader)
-
+	customerID := getAndValidateHeaders(c)
 	if customerID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "must include customerID in headers"})
 		return
 	}
 
 	post, err := p.ds.Get(customerID, id)
 	if err != nil {
-		switch err.(type) {
-		case *datastore.InvalidArugment:
-			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-			return
-		case *datastore.NotFound:
-			c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
-			return
-		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-			return
-		}
+		setReturnError(err, c)
+		return
 	}
 	c.PureJSON(http.StatusOK, post)
 	return
@@ -69,10 +58,39 @@ func (p *DefaultPoster) Get(c *gin.Context) {
 
 func (p *DefaultPoster) Post(c *gin.Context) {
 	// Get headers
-	customerID := c.Request.Header.Get(customerIdHeader)
-
+	customerID := getAndValidateHeaders(c)
 	if customerID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "must include customerID in headers"})
+		return
+	}
+	// Hydrate post
+	input := &dao.Post{}
+	if err := c.BindJSON(input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	post, err := p.ds.Insert(customerID, input)
+	if err != nil {
+		setReturnError(err, c)
+		return
+	}
+	c.PureJSON(http.StatusOK, post)
+	return
+}
+
+func (p *DefaultPoster) Put(c *gin.Context) {
+	urlID := c.Param("id")
+	// Check if id is valid
+	ok := validateID(c, urlID)
+	if !ok {
+		return
+	}
+
+	id := bson.ObjectIdHex(urlID)
+
+	// Get headers
+	customerID := getAndValidateHeaders(c)
+	if customerID == "" {
 		return
 	}
 
@@ -83,17 +101,47 @@ func (p *DefaultPoster) Post(c *gin.Context) {
 		return
 	}
 
-	post, err := p.ds.Insert(customerID, input)
+	// this is weird
+	input.ID = &id
+
+	post, err := p.ds.Update(customerID, input)
 	if err != nil {
-		switch err.(type) {
-		case *datastore.InvalidArugment:
-			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-			return
-		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-			return
-		}
+		setReturnError(err, c)
+		return
 	}
 	c.PureJSON(http.StatusOK, post)
 	return
+}
+
+func validateID(c *gin.Context, urlID string) bool {
+	ok := bson.IsObjectIdHex(urlID)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid post id"})
+		return false
+	}
+	return true
+}
+
+func getAndValidateHeaders(c *gin.Context) string {
+	// Get headers
+	customerID := c.Request.Header.Get(customerIdHeader)
+
+	if customerID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "must include customerID in headers"})
+	}
+	return customerID
+}
+
+func setReturnError(dsErr error, c *gin.Context) {
+	switch err.(type) {
+	case *datastore.InvalidArugment:
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	case *datastore.NotFound:
+		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		return
+	default:
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
 }

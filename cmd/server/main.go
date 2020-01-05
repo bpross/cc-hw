@@ -34,5 +34,6 @@ func main() {
 	handler := handler.NewDefaultPoster(posterDS)
 	r.GET("/post/:id", handler.Get)
 	r.POST("/post", handler.Post)
+	r.PUT("/post/:id", handler.Put)
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

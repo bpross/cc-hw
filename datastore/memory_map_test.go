@@ -5,13 +5,15 @@ import (
 	. "github.com/onsi/gomega"
 	log "github.com/sirupsen/logrus"
 	"labix.org/v2/mgo/bson"
+
+	"github.com/bpross/cc-hw/dao"
 )
 
 var _ = Describe("InMemoryDatastore", func() {
 	var (
 		logger     *log.Logger
 		ds         *InMemoryDatastore
-		record     *Record
+		post       *dao.Post
 		customerID string
 	)
 
@@ -24,28 +26,28 @@ var _ = Describe("InMemoryDatastore", func() {
 
 	Describe("Insert", func() {
 		var (
-			retRecord *Record
-			err       error
+			retPost *dao.Post
+			err     error
 		)
 
 		JustBeforeEach(func() {
-			retRecord, err = ds.Insert(customerID, record)
+			retPost, err = ds.Insert(customerID, post)
 		})
 
-		Context("without record", func() {
+		Context("without post", func() {
 			It("should return an error", func() {
 				Expect(err).NotTo(BeNil())
-				Expect(err.Error()).To(Equal("must provide record"))
+				Expect(err.Error()).To(Equal("must provide post"))
 			})
 
-			It("should NOT return a record", func() {
-				Expect(retRecord).To(BeNil())
+			It("should NOT return a post", func() {
+				Expect(retPost).To(BeNil())
 			})
 		})
 
-		Context("with record.ID", func() {
+		Context("with post.ID", func() {
 			BeforeEach(func() {
-				record = &Record{
+				post = &dao.Post{
 					ID: bson.NewObjectId(),
 				}
 			})
@@ -55,14 +57,14 @@ var _ = Describe("InMemoryDatastore", func() {
 				Expect(err.Error()).To(Equal("cannot provide ID"))
 			})
 
-			It("should NOT return a record", func() {
-				Expect(retRecord).To(BeNil())
+			It("should NOT return a post", func() {
+				Expect(retPost).To(BeNil())
 			})
 		})
 
-		Context("without record.ID", func() {
+		Context("without post.ID", func() {
 			BeforeEach(func() {
-				record = &Record{
+				post = &dao.Post{
 					URL: "test-url",
 					Captions: []string{
 						"caption1",
@@ -82,8 +84,8 @@ var _ = Describe("InMemoryDatastore", func() {
 					Expect(err.Error()).To(Equal("invalid customerID"))
 				})
 
-				It("should NOT return a record", func() {
-					Expect(retRecord).To(BeNil())
+				It("should NOT return a post", func() {
+					Expect(retPost).To(BeNil())
 				})
 			})
 
@@ -96,16 +98,16 @@ var _ = Describe("InMemoryDatastore", func() {
 					Expect(err).To(BeNil())
 				})
 
-				It("should return a record", func() {
-					Expect(retRecord.ID).NotTo(Equal(""))
-					Expect(retRecord.CustID).To(Equal(customerID))
-					Expect(retRecord.URL).To(Equal(record.URL))
-					Expect(retRecord.Captions).To(Equal(record.Captions))
+				It("should return a post", func() {
+					Expect(retPost.ID).NotTo(Equal(""))
+					Expect(retPost.CustID).To(Equal(customerID))
+					Expect(retPost.URL).To(Equal(post.URL))
+					Expect(retPost.Captions).To(Equal(post.Captions))
 				})
 
-				It("should insert a record", func() {
-					storeID := createCompositeID(customerID, retRecord.ID)
-					Expect(ds.store).To(HaveKeyWithValue(storeID, retRecord))
+				It("should insert a post", func() {
+					storeID := createCompositeID(customerID, retPost.ID)
+					Expect(ds.store).To(HaveKeyWithValue(storeID, retPost))
 				})
 			})
 		})
@@ -113,33 +115,33 @@ var _ = Describe("InMemoryDatastore", func() {
 
 	Describe("Get", func() {
 		var (
-			retRecord *Record
-			err       error
-			recordID  bson.ObjectId
+			retPost *dao.Post
+			err     error
+			postID  bson.ObjectId
 		)
 
 		JustBeforeEach(func() {
-			retRecord, err = ds.Get(customerID, recordID)
+			retPost, err = ds.Get(customerID, postID)
 		})
 
-		Context("without recordID", func() {
+		Context("without postID", func() {
 			BeforeEach(func() {
-				recordID = ""
+				postID = ""
 			})
 
 			It("should return an error", func() {
 				Expect(err).NotTo(BeNil())
-				Expect(err.Error()).To(Equal("invalid recordID"))
+				Expect(err.Error()).To(Equal("invalid postID"))
 			})
 
-			It("should NOT return a record", func() {
-				Expect(retRecord).To(BeNil())
+			It("should NOT return a post", func() {
+				Expect(retPost).To(BeNil())
 			})
 		})
 
-		Context("with recordID", func() {
+		Context("with postID", func() {
 			BeforeEach(func() {
-				recordID = bson.NewObjectId()
+				postID = bson.NewObjectId()
 			})
 
 			Context("without customerID", func() {
@@ -152,8 +154,8 @@ var _ = Describe("InMemoryDatastore", func() {
 					Expect(err.Error()).To(Equal("invalid customerID"))
 				})
 
-				It("should NOT return a record", func() {
-					Expect(retRecord).To(BeNil())
+				It("should NOT return a post", func() {
+					Expect(retPost).To(BeNil())
 				})
 			})
 
@@ -162,28 +164,28 @@ var _ = Describe("InMemoryDatastore", func() {
 					customerID = "test-customer"
 				})
 
-				Context("with record not found", func() {
+				Context("with post not found", func() {
 					BeforeEach(func() {
-						ds.store = make(map[string]*Record)
+						ds.store = make(map[string]*dao.Post)
 					})
 
 					It("should return an error", func() {
 						Expect(err).NotTo(BeNil())
-						Expect(err.Error()).To(Equal("record not found"))
+						Expect(err.Error()).To(Equal("post not found"))
 					})
 
-					It("should NOT return a record", func() {
-						Expect(retRecord).To(BeNil())
+					It("should NOT return a post", func() {
+						Expect(retPost).To(BeNil())
 					})
 				})
 
-				Context("with record found", func() {
-					var record *Record
+				Context("with post found", func() {
+					var post *dao.Post
 					BeforeEach(func() {
-						ds.store = make(map[string]*Record)
-						storeID := createCompositeID(customerID, recordID)
-						record = &Record{
-							ID:     recordID,
+						ds.store = make(map[string]*dao.Post)
+						storeID := createCompositeID(customerID, postID)
+						post = &dao.Post{
+							ID:     postID,
 							CustID: customerID,
 							URL:    "test-url",
 							Captions: []string{
@@ -192,15 +194,15 @@ var _ = Describe("InMemoryDatastore", func() {
 								"caption3",
 							},
 						}
-						ds.store[storeID] = record
+						ds.store[storeID] = post
 					})
 
 					It("should NOT return an error", func() {
 						Expect(err).To(BeNil())
 					})
 
-					It("should return a record", func() {
-						Expect(retRecord).To(Equal(record))
+					It("should return a post", func() {
+						Expect(retPost).To(Equal(post))
 					})
 				})
 			})
@@ -209,29 +211,29 @@ var _ = Describe("InMemoryDatastore", func() {
 
 	Describe("Update", func() {
 		var (
-			retRecord *Record
-			err       error
-			record    *Record
+			retPost *dao.Post
+			err     error
+			post    *dao.Post
 		)
 
 		JustBeforeEach(func() {
-			retRecord, err = ds.Update(customerID, record)
+			retPost, err = ds.Update(customerID, post)
 		})
 
-		Context("without record", func() {
+		Context("without post", func() {
 			It("should return an error", func() {
 				Expect(err).NotTo(BeNil())
-				Expect(err.Error()).To(Equal("must provide record"))
+				Expect(err.Error()).To(Equal("must provide post"))
 			})
 
-			It("should NOT return a record", func() {
-				Expect(retRecord).To(BeNil())
+			It("should NOT return a post", func() {
+				Expect(retPost).To(BeNil())
 			})
 		})
 
-		Context("with record", func() {
+		Context("with post", func() {
 			BeforeEach(func() {
-				record = &Record{
+				post = &dao.Post{
 					CustID: customerID,
 					URL:    "test-url1",
 					Captions: []string{
@@ -242,26 +244,26 @@ var _ = Describe("InMemoryDatastore", func() {
 				}
 			})
 
-			Context("without record.ID", func() {
+			Context("without post.ID", func() {
 				BeforeEach(func() {
-					record.ID = ""
+					post.ID = ""
 				})
 
 				It("should return an error", func() {
 					Expect(err).NotTo(BeNil())
-					Expect(err.Error()).To(Equal("invalid recordID"))
+					Expect(err.Error()).To(Equal("invalid postID"))
 				})
 
-				It("should NOT return a record", func() {
-					Expect(retRecord).To(BeNil())
+				It("should NOT return a post", func() {
+					Expect(retPost).To(BeNil())
 				})
 			})
 
-			Context("with record.ID", func() {
-				var recordID bson.ObjectId
+			Context("with post.ID", func() {
+				var postID bson.ObjectId
 				BeforeEach(func() {
-					recordID = bson.NewObjectId()
-					record.ID = recordID
+					postID = bson.NewObjectId()
+					post.ID = postID
 				})
 
 				Context("without customerID", func() {
@@ -274,17 +276,17 @@ var _ = Describe("InMemoryDatastore", func() {
 						Expect(err.Error()).To(Equal("invalid customerID"))
 					})
 
-					It("should NOT return a record", func() {
-						Expect(retRecord).To(BeNil())
+					It("should NOT return a post", func() {
+						Expect(retPost).To(BeNil())
 					})
 				})
 
 				Context("with customerID", func() {
 					BeforeEach(func() {
-						ds.store = make(map[string]*Record)
-						storeID := createCompositeID(customerID, recordID)
-						storedRecord := &Record{
-							ID:     recordID,
+						ds.store = make(map[string]*dao.Post)
+						storeID := createCompositeID(customerID, postID)
+						storedPost := &dao.Post{
+							ID:     postID,
 							CustID: customerID,
 							URL:    "test-url",
 							Captions: []string{
@@ -293,20 +295,20 @@ var _ = Describe("InMemoryDatastore", func() {
 								"caption3",
 							},
 						}
-						ds.store[storeID] = storedRecord
+						ds.store[storeID] = storedPost
 					})
 
 					It("should NOT return an error", func() {
 						Expect(err).To(BeNil())
 					})
 
-					It("should return a record", func() {
-						Expect(retRecord).To(Equal(record))
+					It("should return a post", func() {
+						Expect(retPost).To(Equal(post))
 					})
 
-					It("should update the record", func() {
-						storeID := createCompositeID(customerID, retRecord.ID)
-						Expect(ds.store).To(HaveKeyWithValue(storeID, retRecord))
+					It("should update the post", func() {
+						storeID := createCompositeID(customerID, retPost.ID)
+						Expect(ds.store).To(HaveKeyWithValue(storeID, retPost))
 					})
 				})
 			})

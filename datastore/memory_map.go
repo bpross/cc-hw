@@ -14,6 +14,7 @@ type Datastore interface {
 	Insert(string, *dao.Post) (*dao.Post, error)
 	Get(string, bson.ObjectId) (*dao.Post, error)
 	Update(string, *dao.Post) (*dao.Post, error)
+	Delete(string, bson.ObjectId) error
 }
 
 // InMemoryDatastore implements the Datastore interface for in memory storage
@@ -144,6 +145,11 @@ func (d *InMemoryDatastore) Update(customerID string, post *dao.Post) (*dao.Post
 
 	logger.Info("successfully updated post")
 	return prev, nil
+}
+
+// Delete is not implemented for the in memory datastore
+func (d *InMemoryDatastore) Delete(customerID string, postID bson.ObjectId) error {
+	return fmt.Errorf("unimplemented")
 }
 
 func createCompositeID(customerID string, postID bson.ObjectId) string {

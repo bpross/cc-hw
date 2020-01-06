@@ -1,4 +1,4 @@
-package memory_test
+package combined_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestMemory(t *testing.T) {
+func TestCombined(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Dao Memory Suite")
+	RunSpecs(t, "Dao Combined Suite")
 }

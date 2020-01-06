@@ -10,3 +10,4 @@ COPY . .
 
 RUN go get -u golang.org/x/lint/golint
 RUN go get github.com/onsi/ginkgo/ginkgo
+RUN go get github.com/golang/mock/mockgen

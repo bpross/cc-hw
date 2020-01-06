@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
-	"github.com/bpross/cc-hw/dao/memory"
+	"github.com/bpross/cc-hw/dao/combined"
 	"github.com/bpross/cc-hw/datastore"
 	"github.com/bpross/cc-hw/handler"
 )
@@ -16,6 +16,8 @@ func main() {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 	r := gin.New()        // don't use the Default(), since it comes with a logger
 	r.Use(gin.Recovery()) // add Recovery middleware
+
+	// Pulled from the gin-logrus docs
 	useBanner := false
 	useUTC := true
 	logger := logrus.StandardLogger()
@@ -29,9 +31,15 @@ func main() {
 		[]byte{}, // where the trace ID might already be populated in the headers
 		ginlogrus.WithAggregateLogging(true)))
 
+	// Setup datastores
 	memDS := datastore.NewInMemoryDatastore(logger)
-	posterDS := memory.NewPoster(logger, memDS)
-	handler := handler.NewDefaultPoster(posterDS)
+	cacheDS := datastore.NewNoOpCache(logger)
+
+	// Setup DAO
+	combinedPoster := combined.NewPoster(logger, cacheDS, memDS)
+
+	// Setup handler and routes
+	handler := handler.NewDefaultPoster(combinedPoster)
 	r.GET("/post/:id", handler.Get)
 	r.POST("/post", handler.Post)
 	r.PUT("/post/:id", handler.Put)

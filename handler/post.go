@@ -12,12 +12,12 @@ import (
 
 const customerIDHeader = "x-customer-id"
 
-type PostRequest struct {
+type postRequest struct {
 	URL      string   `json:"url"`
 	Captions []string `json:"captions", omitempty`
 }
 
-type PutRequest struct {
+type putRequest struct {
 	Captions []string `json:"captions", omitempty`
 }
 
@@ -74,7 +74,7 @@ func (p *DefaultPoster) Post(c *gin.Context) {
 		return
 	}
 	// Hydrate post
-	req := &PostRequest{}
+	req := &postRequest{}
 	if err := c.BindJSON(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -108,7 +108,7 @@ func (p *DefaultPoster) Put(c *gin.Context) {
 	}
 
 	// Hydrate post
-	req := &PutRequest{}
+	req := &putRequest{}
 	if err := c.BindJSON(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -157,14 +157,14 @@ func setReturnError(dsErr error, c *gin.Context) {
 	}
 }
 
-func postRequestToPost(req PostRequest) *dao.Post {
+func postRequestToPost(req postRequest) *dao.Post {
 	return &dao.Post{
 		URL:      req.URL,
 		Captions: req.Captions,
 	}
 }
 
-func putRequestToPost(req PutRequest, id bson.ObjectId) *dao.Post {
+func putRequestToPost(req putRequest, id bson.ObjectId) *dao.Post {
 	return &dao.Post{
 		ID:       &id,
 		Captions: req.Captions,

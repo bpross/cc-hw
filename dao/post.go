@@ -7,7 +7,7 @@ import (
 // Post stores in the information about a url
 type Post struct {
 	ID       *bson.ObjectId `json:"id, omitempty"`
-	CustID   string         `json:"cust_id"`
+	CustID   string         `json:"-"` // do not return when we marshal to json
 	URL      string         `json:"url"`
 	Captions []string       `json:"captions", omitempty`
 }

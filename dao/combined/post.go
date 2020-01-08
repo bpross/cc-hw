@@ -29,22 +29,22 @@ func NewPoster(logger *log.Logger, cache, persistent datastore.Datastore) *Poste
 // Insert calls both the persistent and cache datastores. It will only return error
 // on persistent failure. cache failure just means a read to the persistent store later
 func (d *Poster) Insert(customerID string, post *dao.Post) (*dao.Post, error) {
-	post, err := d.persistent.Insert(customerID, post)
+	dsPost, err := d.persistent.Insert(customerID, post)
 	if err != nil {
 		d.logger.WithFields(log.Fields{
 			"post_id": post.ID.Hex(),
-		}).Warn("failed to insert into persisten")
+		}).Warn("failed to insert into persistent")
 		return nil, err
 	}
 
-	_, err = d.cache.Insert(customerID, post)
+	_, err = d.cache.Insert(customerID, dsPost)
 	if err != nil {
 		d.logger.WithFields(log.Fields{
-			"post_id": post.ID.Hex(),
+			"post_id": dsPost.ID.Hex(),
 		}).Warn("failed to insert into cache")
 	}
 
-	return post, nil
+	return dsPost, nil
 }
 
 // Get tries the cache first and then the persistent store, on any cache error

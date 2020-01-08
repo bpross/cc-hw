@@ -20,3 +20,6 @@
 
 # Build directories
 dist/
+
+# Docker env files
+.env

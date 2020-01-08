@@ -184,7 +184,7 @@ var _ = Describe("DefaulPoster", func() {
 					})
 
 					It("should return a post", func() {
-						expected := fmt.Sprintf(`{"id":"%s","cust_id":"test-customer","url":"test-url","captions":["caption1","caption2","caption3"]}`, postID.Hex())
+						expected := fmt.Sprintf(`{"id":"%s","url":"test-url","captions":["caption1","caption2","caption3"]}`, postID.Hex())
 						actual := strings.TrimSuffix(recorder.Body.String(), "\n")
 						Expect(actual).To(Equal(expected))
 					})
@@ -323,7 +323,7 @@ var _ = Describe("DefaulPoster", func() {
 					})
 
 					It("should return a post", func() {
-						expected := fmt.Sprintf(`{"id":"%s","cust_id":"test-customer","url":"test-url","captions":["caption1","caption2","caption3"]}`, postID.Hex())
+						expected := fmt.Sprintf(`{"id":"%s","url":"test-url","captions":["caption1","caption2","caption3"]}`, postID.Hex())
 						actual := strings.TrimSuffix(recorder.Body.String(), "\n")
 						Expect(actual).To(Equal(expected))
 					})
@@ -488,7 +488,7 @@ var _ = Describe("DefaulPoster", func() {
 						})
 
 						It("should return a post", func() {
-							expected := fmt.Sprintf(`{"id":"%s","cust_id":"test-customer","url":"test-url","captions":["caption1","caption2","caption3"]}`, postID.Hex())
+							expected := fmt.Sprintf(`{"id":"%s","url":"test-url","captions":["caption1","caption2","caption3"]}`, postID.Hex())
 							actual := strings.TrimSuffix(recorder.Body.String(), "\n")
 							Expect(actual).To(Equal(expected))
 						})

@@ -1,3 +1,5 @@
+github.com/AYLIEN/aylien_textapi_go v0.6.0 h1:iKLMoiCqfNCkFdRyQf2RXUvyPZTRWiIIJjSxfY5CO3k=
+github.com/AYLIEN/aylien_textapi_go v0.6.0/go.mod h1:cUuuBfHn5Q0/7Fw8P6D9JDWQLsoAV0nAqFPa+bT6K9I=
 github.com/Bose/go-gin-logrus v1.0.3 h1:IW37mNpS+EFihsxyPkZ5NOnuGQ1kMAeFO+A+C+lky4E=
 github.com/Bose/go-gin-logrus v1.0.3/go.mod h1:Zabx1dyPwt+h77OzwgCCEN3BP/L2CmAaUbcebsjglSo=
 github.com/Bose/go-gin-opentracing v1.0.3/go.mod h1:MRjPy7yY92/G4L9B1b1YGSIuSGpevD20ew0g4pMOiZk=

@@ -14,7 +14,7 @@ func TestHandler(t *testing.T) {
 	RunSpecs(t, "Handler Suite")
 }
 
-func setupRouter(p *DefaultPoster) *gin.Engine {
+func setupRouter(p Poster) *gin.Engine {
 	gin.DefaultWriter = ioutil.Discard
 	r := gin.Default()
 	r.GET("/post/:id", p.Get)

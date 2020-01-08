@@ -1,3 +1,4 @@
 #!/bin/bash
 mockgen -destination mocks/github.com/bpross/cc-hw/datastore/datastore.go -source datastore/memory_map.go Datastore -package datastore
 mockgen -destination mocks/github.com/bpross/cc-hw/dao/post.go -source dao/post.go Poster -package dao
+mockgen -destination mocks/github.com/bpross/cc-hw/caption/generate.go -source caption/generate.go Generator -package caption

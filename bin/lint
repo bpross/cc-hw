@@ -1,2 +1,2 @@
 #!/bin/bash
-golint dao/ dao/combined/ dao/cache/ dao/memory/ handler/ datastore/
+golint caption/ dao/ dao/combined/ dao/cache/ dao/memory/ handler/ datastore/

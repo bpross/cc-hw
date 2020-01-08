@@ -9,7 +9,7 @@ import (
 	"github.com/bpross/cc-hw/dao"
 )
 
-type generatePostRequest struct {
+type GeneratePostRequest struct {
 	URL string `json:"url"`
 }
 
@@ -41,7 +41,7 @@ func (p *CaptionGeneratorPoster) Post(c *gin.Context) {
 	}
 
 	// Hydrate post
-	req := &generatePostRequest{}
+	req := &GeneratePostRequest{}
 	if err := c.BindJSON(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -66,7 +66,7 @@ func (p *CaptionGeneratorPoster) Post(c *gin.Context) {
 	return
 }
 
-func generatePostRequestToPost(req generatePostRequest, captions []string) *dao.Post {
+func generatePostRequestToPost(req GeneratePostRequest, captions []string) *dao.Post {
 	return &dao.Post{
 		URL:      req.URL,
 		Captions: captions,

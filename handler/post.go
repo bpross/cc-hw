@@ -14,11 +14,11 @@ const customerIDHeader = "x-customer-id"
 
 type postRequest struct {
 	URL      string   `json:"url"`
-	Captions []string `json:"captions", omitempty`
+	Captions []string `json:"captions,omitempty"`
 }
 
 type putRequest struct {
-	Captions []string `json:"captions", omitempty`
+	Captions []string `json:"captions,omitempty"`
 }
 
 // Poster defines the interface to handle post requests

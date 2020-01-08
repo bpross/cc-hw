@@ -51,7 +51,7 @@ func (d *InMemoryDatastore) Insert(customerID string, post *dao.Post) (*dao.Post
 		"url":        post.URL,
 	})
 
-	logger.Debug("inserting")
+	logger.Info("inserting into memory map")
 
 	// Generate ID
 	id := bson.NewObjectId()
@@ -72,7 +72,7 @@ func (d *InMemoryDatastore) Insert(customerID string, post *dao.Post) (*dao.Post
 
 	logger.WithFields(log.Fields{
 		"post_id": id.Hex(),
-	}).Info("successfully inserted post")
+	}).Debug("successfully inserted post")
 
 	return r, nil
 }
@@ -95,7 +95,7 @@ func (d *InMemoryDatastore) Get(customerID string, postID bson.ObjectId) (*dao.P
 		"postID":     postID.Hex(),
 	})
 
-	logger.Debug("retrieving")
+	logger.Info("retrieving from memory map")
 
 	// Find post in the datastore, if ok is false, the post DNE
 	r, ok := d.store[storeID]
@@ -103,7 +103,7 @@ func (d *InMemoryDatastore) Get(customerID string, postID bson.ObjectId) (*dao.P
 		return nil, NewNotFoundError("post")
 	}
 
-	logger.Info("successfully retrieved")
+	logger.Debug("successfully retrieved")
 	return r, nil
 }
 
@@ -126,7 +126,7 @@ func (d *InMemoryDatastore) Update(customerID string, post *dao.Post) (*dao.Post
 		"postID":     post.ID.Hex(),
 	})
 
-	logger.Debug("updating")
+	logger.Info("updating in memory map")
 
 	// Create composite id
 	storeID := createCompositeID(customerID, *post.ID)
@@ -143,7 +143,7 @@ func (d *InMemoryDatastore) Update(customerID string, post *dao.Post) (*dao.Post
 	// Store post
 	d.store[storeID] = prev
 
-	logger.Info("successfully updated post")
+	logger.Debug("successfully updated post")
 	return prev, nil
 }
 

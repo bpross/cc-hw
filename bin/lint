@@ -1,2 +1,4 @@
 #!/bin/bash
+go mod download >/dev/null 2>&1 
 golint caption/ dao/ dao/combined/ dao/cache/ dao/memory/ handler/ datastore/
+go vet ./caption/ ./dao/ ./dao/combined/ ./dao/cache/ ./dao/memory/ ./handler/ ./datastore/

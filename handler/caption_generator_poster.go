@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -52,7 +51,6 @@ func (p *CaptionGeneratorPoster) Post(c *gin.Context) {
 	captions, err := p.captionGenerator.Create(req.URL, p.numCaptions)
 	if err != nil {
 		// log here
-		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "unable to generate captions"})
 		return
 	}

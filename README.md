@@ -74,7 +74,7 @@ Run these in order:
 - Build the builder image:
   - docker-compose build builder
 - Build the binary:
-	- docker-compose --rm builder bin/build
+	- docker-compose run --rm builder bin/build
 - Build the api image:
 	- docker-compose build api
 - Run the api image:

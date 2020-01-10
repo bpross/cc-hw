@@ -61,12 +61,20 @@ All routes require the header `x-customer-id` to be set with a string id. The `P
 	- Body: `{"captions": str list}`  	   
 
 ### Get up and running
+
+First, create a file in the root directory `.env`
+Add these keys:
+
+- AYLIEN_API_KEY=
+- AYLIEN_APP_ID=
+- AYLIEN_CAPTION_COUNT=
+
 Run these in order:
 
 - Build the builder image:
   - docker-compose build builder
 - Build the binary:
-	- docker-compose build builder
+	- docker-compose --rm builder bin/build
 - Build the api image:
 	- docker-compose build api
 - Run the api image:
